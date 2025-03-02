@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const newsContainer = document.getElementById("news-container");
+    const toggleButton = document.getElementById("theme-toggle");
 
     const RSS_FEED = "https://news.google.com/rss";
     const PROXY_URL = "https://api.allorigins.win/get?url=" + encodeURIComponent(RSS_FEED);
@@ -41,4 +42,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     fetchNews();
     setInterval(fetchNews, 300000); // Refresh every 5 minutes
+
+    // Theme Toggle
+    function toggleTheme() {
+        document.body.classList.toggle("dark-mode");
+        const isDark = document.body.classList.contains("dark-mode");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        toggleButton.textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
+    }
+
+    toggleButton.addEventListener("click", toggleTheme);
+
+    // Apply saved theme
+    if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+        toggleButton.textContent = "☀️ Light Mode";
+    }
 });
