@@ -1,13 +1,37 @@
 document.addEventListener("DOMContentLoaded", () => {
     const newsContainer = document.getElementById("news-container");
     const toggleButton = document.getElementById("theme-toggle");
+    const languageSelector = document.getElementById("language-selector");
 
-    const RSS_FEED = "https://news.google.com/rss";
-    const PROXY_URL = "https://api.allorigins.win/get?url=" + encodeURIComponent(RSS_FEED);
+    const BASE_NEWS_URL = "https://news.google.com/rss?hl=";
+    const LANGUAGE_CODES = {
+        "en": "en-US",
+        "hi": "hi-IN",
+        "es": "es-419",
+        "fr": "fr-FR",
+        "de": "de-DE",
+        "zh": "zh-CN",
+        "ar": "ar-SA",
+        "ru": "ru-RU",
+        "ja": "ja-JP",
+        "ko": "ko-KR",
+        "it": "it-IT",
+        "pt": "pt-BR",
+        "nl": "nl-NL",
+        "tr": "tr-TR",
+        "vi": "vi-VN",
+        "th": "th-TH",
+        "bn": "bn-BD",
+        "ur": "ur-PK",
+        "he": "he-IL",
+        "sw": "sw-KE"
+    };
 
-    async function fetchNews() {
+    async function fetchNews(language) {
         newsContainer.innerHTML = "<p>Fetching latest news...</p>";
-
+        const RSS_FEED = BASE_NEWS_URL + (LANGUAGE_CODES[language] || "en-US");
+        const PROXY_URL = "https://api.allorigins.win/get?url=" + encodeURIComponent(RSS_FEED);
+        
         try {
             const response = await fetch(PROXY_URL);
             if (!response.ok) throw new Error("Failed to fetch news");
@@ -17,8 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const xmlDoc = parser.parseFromString(data.contents, "text/xml");
             const items = xmlDoc.querySelectorAll("item");
 
-            newsContainer.innerHTML = ""; // Clear previous content
-
+            newsContainer.innerHTML = "";
             items.forEach(item => {
                 const title = item.querySelector("title").textContent;
                 const link = item.querySelector("link").textContent;
@@ -33,15 +56,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 `;
                 newsContainer.appendChild(newsItem);
             });
-
         } catch (error) {
             newsContainer.innerHTML = `<p>Error fetching news. Please try again.</p>`;
             console.error("Error fetching news:", error);
         }
     }
 
-    fetchNews();
-    setInterval(fetchNews, 300000); // Refresh every 5 minutes
+    fetchNews("en");
+    setInterval(() => fetchNews(languageSelector.value), 300000);
+
+    // Language Change Event
+    languageSelector.addEventListener("change", (e) => {
+        fetchNews(e.target.value);
+    });
 
     // Theme Toggle
     function toggleTheme() {
